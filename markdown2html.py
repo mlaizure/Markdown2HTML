@@ -26,12 +26,27 @@ def parse_text(md_text, html_filename):
     """parsing markdown and converting to html"""
 
     lines = md_text.split('\n')
+    lines = list(filter(None, lines))
     html_text = ""
-    for line in lines:
-        if '#' in line:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line[0] == '#':
             num_hash = line.count('#')
             html_text = html_text + "<h" + str(num_hash) + ">" + \
                 line[num_hash + 1:] + "</h" + str(num_hash) + ">\n"
+            i += 1
+
+        elif line[0] == '-':
+            ul_text = "<ul>\n"
+            while i < len(lines) and lines[i][0] == '-':
+                ul_text = ul_text + "\t<li>" + lines[i][2:] + "</li>\n"
+                i += 1
+            ul_text = ul_text + "</ul>\n"
+            html_text = html_text + ul_text
+
+        else:
+            i += 1
 
     generate_file(html_text, html_filename)
 
