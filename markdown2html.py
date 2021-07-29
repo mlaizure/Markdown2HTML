@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """ Markdown to HTML converter """
 import sys
+from hashlib import md5
 
 
 def get_files():
@@ -27,7 +28,6 @@ def parse_text(md_text, html_filename):
 
     lines = md_text.split('\n')
     lines = inline_parse(lines)
-    print(lines)
     html_text = ""
     i = 0
     while i < len(lines):
@@ -48,7 +48,7 @@ def parse_text(md_text, html_filename):
 
         elif line.startswith('*'):
             ol_text = "<ol>\n"
-            while i < len(lines) and line.startswith('*'):
+            while i < len(lines) and lines[i].startswith('*'):
                 ol_text = ol_text + "\t<li>" + lines[i][2:] + "<\li>\n"
                 i += 1
             ol_text = ol_text + "</ol>\n"
@@ -57,7 +57,7 @@ def parse_text(md_text, html_filename):
         elif len(line) == 0 and i < len(lines) - 1:
             while i < len(lines) and len(lines[i]) == 0:
                 i += 1
-            if not is_p(lines[i]):
+            if i >= len(lines) or not is_p(lines[i]):
                 continue
             p_text = "<p>\n\t" + lines[i] + "\n"
             i += 1
@@ -96,6 +96,18 @@ def inline_parse(lines):
         while '__' in line:
             line = line.replace('__', '</em>' if closing else '<em>', 1)
             closing = not closing
+
+        while '[[' in line:
+            str_2hash = line[line.index('[[') + 2:line.index(']]')]
+            md5_text = md5(str_2hash.encode()).hexdigest().lower()
+            line = line.replace(line[line.index('[['):line.index(']]') + 2],
+                                md5_text, 1)
+
+        while '((' in line:
+            str_2change = line[line.index('((') + 2:line.index('))')]
+            str_noc = str_2change.replace("c", "").replace("C", "")
+            line = line.replace(line[line.index('(('):line.index('))') + 2],
+                                str_noc, 1)
 
         parsed_lines.append(line)
 
