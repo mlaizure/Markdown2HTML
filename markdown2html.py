@@ -26,24 +26,44 @@ def parse_text(md_text, html_filename):
     """parsing markdown and converting to html"""
 
     lines = md_text.split('\n')
-    lines = list(filter(None, lines))
     html_text = ""
     i = 0
     while i < len(lines):
         line = lines[i]
-        if line[0] == '#':
+        if line.startswith('#'):
             num_hash = line.count('#')
             html_text = html_text + "<h" + str(num_hash) + ">" + \
                 line[num_hash + 1:] + "</h" + str(num_hash) + ">\n"
             i += 1
 
-        elif line[0] == '-':
+        elif line.startswith('-'):
             ul_text = "<ul>\n"
-            while i < len(lines) and lines[i][0] == '-':
+            while i < len(lines) and lines[i].startswith('-'):
                 ul_text = ul_text + "\t<li>" + lines[i][2:] + "</li>\n"
                 i += 1
             ul_text = ul_text + "</ul>\n"
             html_text = html_text + ul_text
+
+        elif is_ol(line):
+            ol_text = "<ol>\n"
+            while i < len(lines) and is_ol(lines[i]):
+                ol_text = ol_text + "\t<li>" + lines[i][2:] + "<\li>\n"
+                i += 1
+            ol_text = ol_text + "</ol>\n"
+            html_text = html_text + ol_text
+
+        elif len(line) == 0 and i < len(lines) - 1:
+            while i < len(lines) and len(lines[i]) == 0:
+                i += 1
+            if not is_p(lines[i]):
+                continue
+            p_text = "<p>\n\t" + lines[i] + "\n"
+            i += 1
+            while i < len(lines) and len(lines[i]) > 0:
+                p_text = p_text + "\t\t<br />\n\t" + lines[i] + "\n"
+                i += 1
+            p_text = p_text + "</p>\n"
+            html_text = html_text + p_text
 
         else:
             i += 1
@@ -51,11 +71,24 @@ def parse_text(md_text, html_filename):
     generate_file(html_text, html_filename)
 
 
+def is_ol(ln):
+    """checking if ol or bold"""
+    return ln.startswith('*') and not \
+        ln.startswith('*', 1)
+
+
+def is_p(ln):
+    """checking if paragraph and not other markdown style"""
+    return not ln.startswith('#') and not ln.startswith('-') and not \
+        (ln.startswith('*') and not ln.startswith('*', 1))
+
+
 def generate_file(html_text, html_filename):
     """generating and populating html output file"""
 
     with open(html_filename, mode='w', encoding='utf-8') as f:
         f.write(html_text)
+
 
 if __name__ == "__main__":
     get_files()
