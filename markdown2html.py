@@ -46,9 +46,9 @@ def parse_text(md_text, html_filename):
             ul_text = ul_text + "</ul>\n"
             html_text = html_text + ul_text
 
-        elif is_ol(line):
+        elif line.startswith('*'):
             ol_text = "<ol>\n"
-            while i < len(lines) and is_ol(lines[i]):
+            while i < len(lines) and line.startswith('*'):
                 ol_text = ol_text + "\t<li>" + lines[i][2:] + "<\li>\n"
                 i += 1
             ol_text = ol_text + "</ol>\n"
@@ -73,16 +73,10 @@ def parse_text(md_text, html_filename):
     generate_file(html_text, html_filename)
 
 
-def is_ol(ln):
-    """checking if ol or bold"""
-    return ln.startswith('*') and not \
-        ln.startswith('*', 1)
-
-
 def is_p(ln):
     """checking if paragraph and not other markdown style"""
     return not ln.startswith('#') and not ln.startswith('-') and not \
-        (ln.startswith('*') and not ln.startswith('*', 1))
+        ln.startswith('*')
 
 
 def inline_parse(lines):
