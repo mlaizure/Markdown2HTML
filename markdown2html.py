@@ -26,6 +26,8 @@ def parse_text(md_text, html_filename):
     """parsing markdown and converting to html"""
 
     lines = md_text.split('\n')
+    lines = inline_parse(lines)
+    print(lines)
     html_text = ""
     i = 0
     while i < len(lines):
@@ -81,6 +83,29 @@ def is_p(ln):
     """checking if paragraph and not other markdown style"""
     return not ln.startswith('#') and not ln.startswith('-') and not \
         (ln.startswith('*') and not ln.startswith('*', 1))
+
+
+def inline_parse(lines):
+    """parsing inline markdown syntax"""
+    parsed_lines = []
+    for line in lines:
+        if len(line) == 0:
+            parsed_lines.append(line)
+            continue
+
+        closing = False
+        while '**' in line:
+            line = line.replace('**', '</b>' if closing else '<b>', 1)
+            closing = not closing
+
+        closing = False
+        while '__' in line:
+            line = line.replace('__', '</em>' if closing else '<em>', 1)
+            closing = not closing
+
+        parsed_lines.append(line)
+
+    return parsed_lines
 
 
 def generate_file(html_text, html_filename):
