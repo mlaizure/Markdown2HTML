@@ -49,7 +49,7 @@ def parse_text(md_text, html_filename):
         elif line.startswith('*'):
             ol_text = "<ol>\n"
             while i < len(lines) and lines[i].startswith('*'):
-                ol_text = ol_text + "\t<li>" + lines[i][2:] + "<\li>\n"
+                ol_text = ol_text + "\t<li>" + lines[i][2:] + "</li>\n"
                 i += 1
             ol_text = ol_text + "</ol>\n"
             html_text = html_text + ol_text
